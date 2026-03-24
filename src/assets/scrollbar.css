@@ -1,0 +1,23 @@
+/* Custom Scrollbar Styling */
+.sidebar-menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-menu::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border-radius: 3px;
+}
+
+.sidebar-menu::-webkit-scrollbar-thumb:hover {
+  background: #5a6672;
+}
+
+/* Firefox */
+.sidebar-menu {
+  scrollbar-color: #4b5563 transparent;
+  scrollbar-width: thin;
+}
