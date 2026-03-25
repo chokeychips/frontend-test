@@ -1,74 +1,15 @@
 <script setup>
 import { ref } from "vue";
 import Autocomplete from "@/components/Autocomplete.vue";
-import api from "@/services/api";
+import {
+  fetchRole,
+  fetchBranch,
+  fetchSegbis,
+  fetchSupervisor,
+  fetchChannel,
+} from "@/services/userService";
 
-const fetchRole = (search) => {
-  return api.get("/api/role/list", {
-    params: {
-      search,
-      page: 1,
-      perPage: 10,
-    },
-  });
-};
-
-const fetchBranch = (search) => {
-  return api.get("/api/branch/list", {
-    params: {
-      search,
-      page: 1,
-      perPage: 10,
-    },
-  });
-};
-
-const fetchSegbis = (search) => {
-  const keyword = search?.trim() || "";
-
-  return api.get("/api/reference/segment-business", {
-    params: {
-      keyword,
-      page: 1,
-      perPage: 10,
-      filter: JSON.stringify({ keyword, page: 1, perPage: 10 }),
-    },
-  });
-};
-
-const fetchSupervisor = (search) => {
-  const keyword = search?.trim() || "";
-
-  return api
-    .get("/api/reference/supervisor", {
-      params: {
-        search: keyword,
-        page: 1,
-        perPage: 10,
-        filter: JSON.stringify({ keyword, page: 1, perPage: 10 }),
-      },
-    })
-    .then((res) => {
-      // Normalize supervisor data - response has nested status object
-      if (res.data?.data && Array.isArray(res.data.data)) {
-        res.data.data = res.data.data.map((item) => ({
-          ...item,
-          name: item.name || item.status?.name || `ID: ${item.id}`,
-        }));
-      }
-      return res;
-    });
-};
-
-const fetchChannel = (search) => {
-  return api.get("/api/channel/list", {
-    params: {
-      search,
-      page: 1,
-      perPage: 10,
-    },
-  });
-};
+// Fetch functions are imported from userService
 
 const selectedRole = ref(null);
 const selectedBranch = ref(null);

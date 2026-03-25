@@ -2,7 +2,7 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
-import api from "@/services/api";
+import { login, logout } from "@/services/authService";
 
 const username = ref("");
 const password = ref("");
@@ -41,7 +41,7 @@ const validateForm = () => {
   return true;
 };
 
-const login = async () => {
+const handleLogin = async () => {
   if (!validateForm()) {
     return;
   }
@@ -50,11 +50,7 @@ const login = async () => {
   errorMessage.value = "";
 
   try {
-    let loginResponse = await api.post("/api/auth/login", {
-      username: username.value,
-      password: password.value,
-      fcm: "",
-    });
+    let loginResponse = await login(username.value, password.value, "");
 
     // Check if response status is false (even if HTTP 200)
     if (loginResponse.data?.status === false) {
@@ -62,16 +58,12 @@ const login = async () => {
         errorMessage.value = "❗Sesi aktif terdeteksi; mencoba reset sesi dan login ulang...";
 
         try {
-          await api.post("/api/auth/logout");
+          await logout();
           authStore.logout();
           localStorage.removeItem("token");
           sessionStorage.removeItem("token");
 
-          const retry = await api.post("/api/auth/login", {
-            username: username.value,
-            password: password.value,
-            fcm: "",
-          });
+          const retry = await login(username.value, password.value, "");
 
           if (retry.data?.status === true) {
             loginResponse = retry;
@@ -130,7 +122,7 @@ const login = async () => {
 
 const handleKeyPress = (e) => {
   if (e.key === "Enter") {
-    login();
+    handleLogin();
   }
 };
 </script>
@@ -176,7 +168,7 @@ const handleKeyPress = (e) => {
 
       <!-- Login Button -->
       <button
-        @click="login"
+        @click="handleLogin"
         :disabled="isLoading"
         class="w-full bg-blue-500 text-white font-bold py-2 rounded-lg hover:bg-blue-600 disabled:bg-gray-400 transition"
       >

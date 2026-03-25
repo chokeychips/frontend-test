@@ -4,6 +4,8 @@ import { useAuthStore } from "@/stores/auth";
 import Login from "@/views/LoginView.vue";
 import Dashboard from "@/views/DashboardView.vue";
 import User from "@/views/menu/UserView.vue";
+import UserCreate from "@/views/menu/UserCreateView.vue";
+import UserEdit from "@/views/menu/UserEditView.vue";
 import MyTask from "@/views/menu/MyTaskView.vue";
 import Approval from "@/views/menu/ApprovalView.vue";
 import Maintenance from "@/views/menu/MaintenanceView.vue";
@@ -17,6 +19,8 @@ const routes = [
     meta: { requiresAuth: true },
     children: [
       { path: "users", component: User, meta: { requiresAuth: true } },
+      { path: "users/create", component: UserCreate, meta: { requiresAuth: true } },
+      { path: "users/edit/:id", component: UserEdit, meta: { requiresAuth: true } },
       { path: "mytask-maintenance", component: MyTask, meta: { requiresAuth: true } },
       { path: "approval", component: Approval, meta: { requiresAuth: true } },
       { path: "maintenance", component: Maintenance, meta: { requiresAuth: true } },
