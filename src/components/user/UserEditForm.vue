@@ -43,6 +43,7 @@ const form = ref({
 
 const errors = ref({});
 
+// load user data into local form model
 const loadUser = (u) => {
   if (!u) return;
   form.value.id = u.id || u.idUser || u.userId || 0;
@@ -65,6 +66,7 @@ const loadUser = (u) => {
   selectedChannel.value = u.channel || null;
 };
 
+// watch user prop for changes
 watch(
   () => props.user,
   (newVal) => {
@@ -73,6 +75,7 @@ watch(
   { immediate: true },
 );
 
+// validate current form values
 const validate = () => {
   errors.value = {};
 
@@ -146,15 +149,7 @@ const handleSubmit = async () => {
     idChannel: form.value.idChannel || 0,
   };
 
-  console.log("[USER_FORM] Form data before submit:", JSON.stringify(form.value, null, 2));
-  console.log("[USER_FORM] Payload being sent:", JSON.stringify(payload, null, 2));
-  console.log("[USER_FORM] Each field type check:");
-  console.log("  - id:", payload.id, "type:", typeof payload.id);
-  console.log("  - idRole:", payload.idRole, "type:", typeof payload.idRole);
-  console.log("  - idBranch:", payload.idBranch, "type:", typeof payload.idBranch);
-  console.log("  - idSegbis:", payload.idSegbis, "type:", typeof payload.idSegbis);
-
-  // Emit only: parent will handle request flow + approval workflow
+  // submit payload to parent component
   emit("submit", payload);
 };
 </script>

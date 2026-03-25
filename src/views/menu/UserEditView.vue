@@ -1,79 +1,48 @@
 <script setup>
+// imports
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import UserEditForm from "@/components/user/UserEditForm.vue";
 import { updateUser, getUserList } from "@/services/userService";
 import { approveTask } from "@/services/workflowService";
 
+// router and route
 const router = useRouter();
 const route = useRoute();
 
+// state refs
 const user = ref(null);
 const loading = ref(true);
 const error = ref("");
 
+// load user detail based on route param
 const fetchUser = async (id) => {
   try {
     loading.value = true;
     error.value = "";
-    console.log("[USER] Fetching user with ID from URL:", id, "Type:", typeof id);
 
     const res = await getUserList({ page: 1, perPage: 1000 });
-    console.log("[USER] Fetched user list count:", res.data.data.length);
-    console.log("[USER] First user in list:", res.data.data[0]);
-    console.log("[USER] Sample field check first user:", {
-      id: res.data.data[0]?.id,
-      idUser: res.data.data[0]?.idUser,
-      userId: res.data.data[0]?.userId,
-    });
-
-    // Debug: tampilkan semua user ID yang ada
-    console.log(
-      "[USER] All user IDs in list:",
-      res.data.data.map((u) => ({ id: u.id, idUser: u.idUser, name: u.name })),
-    );
-
     const foundUser = res.data.data.find((u) => u.id == id || u.idUser == id);
-    console.log("[USER] Found user:", foundUser);
 
     if (foundUser) {
       user.value = foundUser;
-      console.log("[USER] Loaded user data:", foundUser);
     } else {
       error.value = "User tidak ditemukan";
-      console.error("[USER] User not found. Searching by different ID fields:");
-      res.data.data.forEach((u, idx) => {
-        console.log(`[USER] User ${idx}:`, {
-          id: u.id,
-          idUser: u.idUser,
-          userId: u.userId,
-          userName: u.userName,
-          name: u.name,
-        });
-      });
     }
   } catch (err) {
-    console.error("[USER] Fetch user error:", err);
     error.value = err.response?.data?.message || "Gagal memuat data user";
   } finally {
     loading.value = false;
   }
 };
 
+// submit edited user data
 const handleEditSubmit = async (data) => {
   try {
-    console.log("[USER] Submitting user edit with ID:", data.id);
-    console.log("[USER] Submitting user edit data:", JSON.stringify(data, null, 2));
-
     const updateResponse = await updateUser(data.id, data);
-    console.log("[USER] Update response:", updateResponse);
-    console.log("[USER] Update response full data:", JSON.stringify(updateResponse.data, null, 2));
 
-    // Check if API returned an error (status: false)
     if (updateResponse.data?.status === false) {
       const errorMsg = updateResponse.data?.message || "API returned error";
-      console.error("[USER] API Error:", errorMsg);
-      console.error("[USER] API Error data:", JSON.stringify(updateResponse.data, null, 2));
       alert("❌ Gagal update user: " + errorMsg);
       return;
     }
@@ -96,24 +65,18 @@ const handleEditSubmit = async (data) => {
       auditTrailId = updateResponse.data.auditTrailId;
     }
 
-    console.log("[USER] Extracted auditTrailId:", auditTrailId);
-
-    // Bikin flow mirip create: langsung kirim ke workflow kalau dapat idAuditTrail.
+    // extract audit trail id from response
     if (auditTrailId) {
       try {
-        console.log("[USER] Submitting edit audit trail to workflow:", auditTrailId);
         await approveTask(auditTrailId, "User edit request approved");
         alert("✅ User berhasil diperbarui dan workflow disubmit");
       } catch (workflowErr) {
-        console.error("[USER] Workflow submit error:", workflowErr);
-        console.error("[USER] Workflow error details:", workflowErr.response?.data);
         alert(
           "⚠️ User diperbarui, tapi gagal submit ke workflow: " +
             (workflowErr.response?.data?.message || workflowErr.message),
         );
       }
     } else {
-      console.warn("[USER] No audit trail ID found in response, tidak bisa submit workflow");
       alert(
         "⚠️ User berhasil diperbarui, tapi auditTrailId tidak ditemukan (workflow tidak dijalankan)",
       );
@@ -121,17 +84,17 @@ const handleEditSubmit = async (data) => {
 
     setTimeout(() => router.push("/dashboard/users"), 1000);
   } catch (err) {
-    console.error("[USER] Update error:", err);
-    console.error("[USER] Update error response:", JSON.stringify(err.response?.data, null, 2));
     const errorMsg = err.response?.data?.message || "Gagal update user";
     alert(errorMsg);
   }
 };
 
+// cancel action
 const handleEditCancel = () => {
   router.push("/dashboard/users");
 };
 
+// init load user
 onMounted(() => {
   const userId = route.params.id;
   if (userId) {

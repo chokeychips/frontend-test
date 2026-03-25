@@ -1,10 +1,13 @@
 <script setup>
+// imports
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { getMyTaskList, approveTask } from "@/services/workflowService";
 
+// router helper
 const router = useRouter();
 
+// state refs
 const tasks = ref([]);
 const loading = ref(false);
 const error = ref("");
@@ -12,6 +15,7 @@ const selectedTask = ref(null);
 const approvalReason = ref("");
 const isSubmitting = ref(false);
 
+// fetch task list dari backend
 const fetchTasks = async () => {
   try {
     loading.value = true;
@@ -19,12 +23,11 @@ const fetchTasks = async () => {
 
     const res = await getMyTaskList();
 
-    // Handle API response
+    // parse API response
     let taskList = [];
 
     if (res.data?.status === false) {
       error.value = res.data?.message || "API returned error";
-      console.error("[MYTASK] API Error:", error.value);
       taskList = [];
     } else {
       taskList = res.data?.data || [];
@@ -32,7 +35,6 @@ const fetchTasks = async () => {
 
     tasks.value = taskList;
   } catch (err) {
-    console.error("[MYTASK] Fetch error:", err);
     error.value = err.response?.data?.message || err.message || "Gagal memuat task";
     tasks.value = [];
   } finally {
@@ -40,6 +42,7 @@ const fetchTasks = async () => {
   }
 };
 
+// modal approval controls
 const openApprovalModal = (task) => {
   selectedTask.value = task;
   approvalReason.value = "";
@@ -50,6 +53,7 @@ const closeApprovalModal = () => {
   approvalReason.value = "";
 };
 
+// utility parse task data JSON / object
 const parseTaskData = (data) => {
   if (!data) return null;
 
@@ -68,6 +72,7 @@ const parseTaskData = (data) => {
   return null;
 };
 
+// find user ID recursively
 const findUserId = (obj) => {
   if (!obj || typeof obj !== "object") return null;
 
@@ -87,6 +92,7 @@ const findUserId = (obj) => {
   return null;
 };
 
+// compute user id from task details
 const getTaskUserId = (task) => {
   const candidates = [
     task.userId,
@@ -112,6 +118,7 @@ const getTaskUserId = (task) => {
   return null;
 };
 
+// navigate ke edit request
 const goToEditRequest = (task) => {
   const userId = getTaskUserId(task);
   if (!userId) {
@@ -125,6 +132,7 @@ const goToEditRequest = (task) => {
   router.push(`/dashboard/users/edit/${userId}`);
 };
 
+// approve task action
 const handleApprove = async () => {
   if (!selectedTask.value) return;
 
@@ -150,10 +158,6 @@ const handleApprove = async () => {
     closeApprovalModal();
     fetchTasks();
   } catch (err) {
-    console.error("[MYTASK] Approve error:", err);
-    console.error("[MYTASK] Error response data:", err.response?.data);
-    console.error("[MYTASK] Error response status:", err.response?.status);
-
     const errorMsg =
       err.response?.data?.message || err.response?.data?.error || err.message || "Gagal approve";
 
@@ -163,6 +167,7 @@ const handleApprove = async () => {
   }
 };
 
+// init fetch
 onMounted(() => {
   fetchTasks();
 });

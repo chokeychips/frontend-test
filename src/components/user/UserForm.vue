@@ -1,4 +1,5 @@
 <script setup>
+// component imports
 import { ref } from "vue";
 import Autocomplete from "@/components/Autocomplete.vue";
 import {
@@ -9,16 +10,17 @@ import {
   fetchChannel,
 } from "@/services/userService";
 
-// Fetch functions are imported from userService
-
+// selected item refs
 const selectedRole = ref(null);
 const selectedBranch = ref(null);
 const selectedSegbis = ref(null);
 const selectedSupervisor = ref(null);
 const selectedChannel = ref(null);
 
+// emit events to parent
 const emit = defineEmits(["submit"]);
 
+// form state
 const form = ref({
   userName: "",
   password: "",
@@ -35,6 +37,7 @@ const form = ref({
 
 const errors = ref({});
 
+// validation logic
 const validate = () => {
   errors.value = {};
 
@@ -69,6 +72,7 @@ const validate = () => {
   return Object.keys(errors.value).length === 0;
 };
 
+// select handlers
 const onRoleSelect = (val) => {
   selectedRole.value = val;
   form.value.idRole = val?.id || val?.idRole || null;
@@ -94,6 +98,7 @@ const onChannelSelect = (val) => {
   form.value.idChannel = val?.id || val?.idChannel || null;
 };
 
+// submit handler
 const handleSubmit = () => {
   if (!validate()) return;
 
