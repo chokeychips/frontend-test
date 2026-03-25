@@ -142,6 +142,7 @@ npm run test:e2e
 - `jsconfig.json` : path alias `@` => `src`
 - `eslint.config.js` : aturan lint
 
+<<<<<<< HEAD
 ## 📌 Catatan Pengembangan
 
 - Gunakan format konsisten: camelCase, PascalCase untuk Nama Komponen
@@ -149,6 +150,8 @@ npm run test:e2e
 - Jika menambahkan fitur baru, update `src/router/index.js` + sidebar navigasi
 - Tambah tes E2E untuk alur utama (login, akses dashboard, aksi CRUD)
 
+=======
+>>>>>>> fix-dari-detached
 ## 📦 Deployment
 
 1. `npm run build`
@@ -163,5 +166,8 @@ npm run test:e2e
 4. Lint & test: `npm run lint`, `npm run test:e2e`
 
 ---
+<<<<<<< HEAD
 
 Dokumentasi disusun fokus kemudahan pembacaan, pemisahan concern setiap modul, dan referensi cepat untuk developer baru. Selamat mengembangkan!
+=======
+>>>>>>> fix-dari-detached

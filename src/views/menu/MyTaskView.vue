@@ -1,7 +1,13 @@
 <script setup>
+// imports
 import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { getMyTaskList, approveTask } from "@/services/workflowService";
 
+// router helper
+const router = useRouter();
+
+// state refs
 const tasks = ref([]);
 const loading = ref(false);
 const error = ref("");
@@ -9,6 +15,7 @@ const selectedTask = ref(null);
 const approvalReason = ref("");
 const isSubmitting = ref(false);
 
+// fetch task list dari backend
 const fetchTasks = async () => {
   try {
     loading.value = true;
@@ -16,12 +23,11 @@ const fetchTasks = async () => {
 
     const res = await getMyTaskList();
 
-    // Handle API response
+    // parse API response
     let taskList = [];
 
     if (res.data?.status === false) {
       error.value = res.data?.message || "API returned error";
-      console.error("[MYTASK] API Error:", error.value);
       taskList = [];
     } else {
       taskList = res.data?.data || [];
@@ -29,7 +35,6 @@ const fetchTasks = async () => {
 
     tasks.value = taskList;
   } catch (err) {
-    console.error("[MYTASK] Fetch error:", err);
     error.value = err.response?.data?.message || err.message || "Gagal memuat task";
     tasks.value = [];
   } finally {
@@ -37,6 +42,7 @@ const fetchTasks = async () => {
   }
 };
 
+// modal approval controls
 const openApprovalModal = (task) => {
   selectedTask.value = task;
   approvalReason.value = "";
@@ -47,6 +53,86 @@ const closeApprovalModal = () => {
   approvalReason.value = "";
 };
 
+// utility parse task data JSON / object
+const parseTaskData = (data) => {
+  if (!data) return null;
+
+  if (typeof data === "string") {
+    try {
+      return JSON.parse(data);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  if (typeof data === "object") {
+    return data;
+  }
+
+  return null;
+};
+
+// find user ID recursively
+const findUserId = (obj) => {
+  if (!obj || typeof obj !== "object") return null;
+
+  if (obj.userId) return obj.userId;
+  if (obj.idUser) return obj.idUser;
+  if (obj.user?.id) return obj.user.id;
+  if (obj.id && obj.idAuditTrail == null) return obj.id; // tidak ambil audittrail id
+
+  for (const key of Object.keys(obj)) {
+    const value = obj[key];
+    if (typeof value === "object") {
+      const nested = findUserId(value);
+      if (nested) return nested;
+    }
+  }
+
+  return null;
+};
+
+// compute user id from task details
+const getTaskUserId = (task) => {
+  const candidates = [
+    task.userId,
+    task.idUser,
+    task.targetId,
+    task.data?.idUser,
+    task.data?.userId,
+    task.data?.id,
+  ];
+
+  for (const c of candidates) {
+    if (c) return c;
+  }
+
+  const taskData = parseTaskData(task.data);
+  const nestedId = findUserId(taskData);
+  if (nestedId) return nestedId;
+
+  const actionData = parseTaskData(task.action);
+  const nestedActionId = findUserId(actionData);
+  if (nestedActionId) return nestedActionId;
+
+  return null;
+};
+
+// navigate ke edit request
+const goToEditRequest = (task) => {
+  const userId = getTaskUserId(task);
+  if (!userId) {
+    console.error("MyTask user id lookup failed", task);
+    alert(
+      "Tidak bisa menemukan user ID untuk request ini. Cek console log (task object) dan minta backend menyertakan userId di task data.",
+    );
+    return;
+  }
+
+  router.push(`/dashboard/users/edit/${userId}`);
+};
+
+// approve task action
 const handleApprove = async () => {
   if (!selectedTask.value) return;
 
@@ -72,10 +158,6 @@ const handleApprove = async () => {
     closeApprovalModal();
     fetchTasks();
   } catch (err) {
-    console.error("[MYTASK] Approve error:", err);
-    console.error("[MYTASK] Error response data:", err.response?.data);
-    console.error("[MYTASK] Error response status:", err.response?.status);
-
     const errorMsg =
       err.response?.data?.message || err.response?.data?.error || err.message || "Gagal approve";
 
@@ -85,6 +167,7 @@ const handleApprove = async () => {
   }
 };
 
+// init fetch
 onMounted(() => {
   fetchTasks();
 });
@@ -139,18 +222,28 @@ onMounted(() => {
             <span v-else class="text-yellow-600 font-semibold">⧖ Pending</span>
           </td>
           <td class="p-2 text-center">
-            <button
-              :disabled="task.approvedBy"
-              @click="openApprovalModal(task)"
-              :class="[
-                'px-4 py-2 rounded font-semibold',
-                task.approvedBy
-                  ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
-                  : 'bg-blue-500 text-white hover:bg-blue-600',
-              ]"
-            >
-              {{ task.approvedBy ? "Sudah Approved" : "Approve Tahap 1" }}
-            </button>
+            <div class="flex flex-col gap-2 items-center">
+              <button
+                :disabled="task.approvedBy"
+                @click="openApprovalModal(task)"
+                :class="[
+                  'px-3 py-2 rounded font-semibold text-sm',
+                  task.approvedBy
+                    ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                    : 'bg-blue-500 text-white hover:bg-blue-600',
+                ]"
+              >
+                {{ task.approvedBy ? "Sudah Approved" : "Approve" }}
+              </button>
+
+              <button
+                v-if="getTaskUserId(task)"
+                @click="goToEditRequest(task)"
+                class="px-3 py-2 rounded font-semibold text-sm bg-yellow-500 text-white hover:bg-yellow-600"
+              >
+                Edit request
+              </button>
+            </div>
           </td>
         </tr>
       </tbody>

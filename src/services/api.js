@@ -22,16 +22,23 @@ api.interceptors.request.use((config) => {
     );
   }
 
+  // Log request body if POST/PUT
+  if (config.data) {
+    console.log("[API] Request body:", JSON.stringify(config.data, null, 2));
+  }
+
   return config;
 });
 
 api.interceptors.response.use(
   (response) => {
     console.log("[API] Response received:", response.status, response.config.url);
+    console.log("[API] Full response data:", JSON.stringify(response.data, null, 2));
     return response;
   },
   (error) => {
     console.error("[API] Error response:", error.response?.status, error.response?.data?.message);
+    console.error("[API] Full error data:", JSON.stringify(error.response?.data, null, 2));
 
     // Handle 401 Unauthorized - Session expired
     if (error.response?.status === 401) {

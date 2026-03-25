@@ -1,14 +1,10 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
+import { useRouter } from "vue-router";
 import { getUserList } from "@/services/userService";
-import UserForm from "@/components/user/UserForm.vue";
-import UserEditForm from "@/components/user/UserEditForm.vue";
-import { createUser, updateUser } from "@/services/userService";
-import { UiTable, UiModal, UiButton } from "@/components/ui";
+import { UiTable, UiButton } from "@/components/ui";
 
-const showForm = ref(false);
-const showEditForm = ref(false);
-const editingUser = ref(null);
+const router = useRouter();
 
 const users = ref([]);
 const loading = ref(false);
@@ -47,8 +43,6 @@ const fetchUsers = async () => {
       perPage: limit.value,
     });
 
-    console.log("[USER] Response:", res.data);
-
     // Struktur: res.data.data = array user, res.data.totalData = total
     users.value = res.data.data || [];
     totalData.value = res.data.totalData || 0;
@@ -79,52 +73,8 @@ const prevPage = () => {
   }
 };
 
-const handleCreate = async (data) => {
-  try {
-    await createUser(data);
-    alert("User berhasil dibuat");
-    showForm.value = false;
-    error.value = "";
-    fetchUsers();
-  } catch (err) {
-    console.error("[USER] Create error:", err);
-    const errorMsg = err.response?.data?.message || "Gagal create user";
-    alert(errorMsg);
-
-    // If 401, error interceptor will redirect to login
-  }
-};
-
-const handleEditSelect = (user) => {
-  editingUser.value = user;
-  showEditForm.value = true;
-  showForm.value = false;
-};
-
-const handleEditSubmit = async (data) => {
-  try {
-    await updateUser(data.id, data);
-    alert("User berhasil diperbarui");
-    showEditForm.value = false;
-    editingUser.value = null;
-    error.value = "";
-    fetchUsers();
-  } catch (err) {
-    console.error("[USER] Update error:", err);
-    const errorMsg = err.response?.data?.message || "Gagal update user";
-    alert(errorMsg);
-  }
-};
-
-const handleEditCancel = () => {
-  showEditForm.value = false;
-  editingUser.value = null;
-};
-
-const handleTableAction = ({ action, item }) => {
-  if (action === "edit") {
-    handleEditSelect(item);
-  }
+const handleCreateUser = () => {
+  router.push("/dashboard/users/create");
 };
 
 onMounted(() => {
@@ -146,22 +96,12 @@ onMounted(() => {
 
     <!-- Add User Button -->
     <button
-      v-if="!showForm && !showEditForm && !loading && !error"
-      @click="showForm = true"
+      v-if="!loading && !error"
+      @click="handleCreateUser"
       class="mb-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
     >
       + Add User
     </button>
-
-    <!-- Create Form Modal -->
-    <UiModal :show="showForm" title="Add New User" size="xl" @close="showForm = false">
-      <UserForm @submit="handleCreate" />
-    </UiModal>
-
-    <!-- Edit Form Modal -->
-    <UiModal :show="showEditForm" title="Edit User" size="xl" @close="handleEditCancel">
-      <UserEditForm :user="editingUser" @submit="handleEditSubmit" @cancel="handleEditCancel" />
-    </UiModal>
 
     <!-- Table -->
     <UiTable
@@ -171,10 +111,15 @@ onMounted(() => {
       empty-message="Tidak ada data user"
       show-actions
       actions-label="Aksi"
-      @action="handleTableAction"
     >
       <template #actions="{ item }">
-        <UiButton variant="warning" size="sm" @click="handleEditSelect(item)"> Edit </UiButton>
+        <UiButton
+          variant="warning"
+          size="sm"
+          @click="router.push(`/dashboard/users/edit/${item.id}`)"
+        >
+          Edit
+        </UiButton>
       </template>
     </UiTable>
 

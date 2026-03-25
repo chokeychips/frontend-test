@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import api from "@/services/api";
+import { login, logout, checkToken, getProfile } from "@/services/authService";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
@@ -18,7 +18,7 @@ export const useAuthStore = defineStore("auth", {
       }
 
       try {
-        const res = await api.post("/api/auth/checktoken");
+        const res = await checkToken();
 
         this.isAuthenticated = true;
 
@@ -37,7 +37,7 @@ export const useAuthStore = defineStore("auth", {
 
     async getProfile() {
       try {
-        const res = await api.get("/api/auth/my/profile");
+        const res = await getProfile();
 
         this.user = res.data.data[0];
       } catch (err) {
@@ -56,7 +56,7 @@ export const useAuthStore = defineStore("auth", {
 
     async logoutFromServer() {
       try {
-        await api.post("/api/auth/logout");
+        await logout();
       } catch (err) {
         console.error("[AUTH] Server logout failed:", err.message);
         // Continue local logout even if server request gagal

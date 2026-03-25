@@ -1,73 +1,15 @@
 <script setup>
 import { ref, watch } from "vue";
 import Autocomplete from "@/components/Autocomplete.vue";
-import api from "@/services/api";
-import { updateUser } from "@/services/userService";
+import {
+  fetchRole,
+  fetchBranch,
+  fetchSegbis,
+  fetchSupervisor,
+  fetchChannel,
+} from "@/services/userService";
 
-const fetchRole = (search) => {
-  return api.get("/api/role/list", {
-    params: {
-      search,
-      page: 1,
-      perPage: 10,
-    },
-  });
-};
-
-const fetchBranch = (search) => {
-  return api.get("/api/branch/list", {
-    params: {
-      search,
-      page: 1,
-      perPage: 10,
-    },
-  });
-};
-
-const fetchSegbis = (search) => {
-  const keyword = search?.trim() || "";
-  return api.get("/api/reference/segment-business", {
-    params: {
-      keyword,
-      page: 1,
-      perPage: 10,
-      filter: JSON.stringify({ keyword, page: 1, perPage: 10 }),
-    },
-  });
-};
-
-const fetchSupervisor = (search) => {
-  const keyword = search?.trim() || "";
-
-  return api
-    .get("/api/reference/supervisor", {
-      params: {
-        search: keyword,
-        page: 1,
-        perPage: 10,
-        filter: JSON.stringify({ keyword, page: 1, perPage: 10 }),
-      },
-    })
-    .then((res) => {
-      if (res.data?.data && Array.isArray(res.data.data)) {
-        res.data.data = res.data.data.map((item) => ({
-          ...item,
-          name: item.name || item.status?.name || `ID: ${item.id}`,
-        }));
-      }
-      return res;
-    });
-};
-
-const fetchChannel = (search) => {
-  return api.get("/api/channel/list", {
-    params: {
-      search,
-      page: 1,
-      perPage: 10,
-    },
-  });
-};
+// Fetch functions are imported from userService
 
 const props = defineProps({
   user: {
@@ -101,9 +43,10 @@ const form = ref({
 
 const errors = ref({});
 
+// load user data into local form model
 const loadUser = (u) => {
   if (!u) return;
-  form.value.id = u.id;
+  form.value.id = u.id || u.idUser || u.userId || 0;
   form.value.userName = u.userName || u.username || "";
   form.value.password = "";
   form.value.name = u.name || "";
@@ -123,6 +66,7 @@ const loadUser = (u) => {
   selectedChannel.value = u.channel || null;
 };
 
+// watch user prop for changes
 watch(
   () => props.user,
   (newVal) => {
@@ -131,6 +75,7 @@ watch(
   { immediate: true },
 );
 
+// validate current form values
 const validate = () => {
   errors.value = {};
 
@@ -204,7 +149,7 @@ const handleSubmit = async () => {
     idChannel: form.value.idChannel || 0,
   };
 
-  await updateUser(form.value.id, payload);
+  // submit payload to parent component
   emit("submit", payload);
 };
 </script>

@@ -1,83 +1,26 @@
 <script setup>
+// component imports
 import { ref } from "vue";
 import Autocomplete from "@/components/Autocomplete.vue";
-import api from "@/services/api";
+import {
+  fetchRole,
+  fetchBranch,
+  fetchSegbis,
+  fetchSupervisor,
+  fetchChannel,
+} from "@/services/userService";
 
-const fetchRole = (search) => {
-  return api.get("/api/role/list", {
-    params: {
-      search,
-      page: 1,
-      perPage: 10,
-    },
-  });
-};
-
-const fetchBranch = (search) => {
-  return api.get("/api/branch/list", {
-    params: {
-      search,
-      page: 1,
-      perPage: 10,
-    },
-  });
-};
-
-const fetchSegbis = (search) => {
-  const keyword = search?.trim() || "";
-
-  return api.get("/api/reference/segment-business", {
-    params: {
-      keyword,
-      page: 1,
-      perPage: 10,
-      filter: JSON.stringify({ keyword, page: 1, perPage: 10 }),
-    },
-  });
-};
-
-const fetchSupervisor = (search) => {
-  const keyword = search?.trim() || "";
-
-  return api
-    .get("/api/reference/supervisor", {
-      params: {
-        search: keyword,
-        page: 1,
-        perPage: 10,
-        filter: JSON.stringify({ keyword, page: 1, perPage: 10 }),
-      },
-    })
-    .then((res) => {
-      // Normalize supervisor data - response has nested status object
-      if (res.data?.data && Array.isArray(res.data.data)) {
-        res.data.data = res.data.data.map((item) => ({
-          ...item,
-          name: item.name || item.status?.name || `ID: ${item.id}`,
-        }));
-      }
-      return res;
-    });
-};
-
-const fetchChannel = (search) => {
-  return api.get("/api/channel/list", {
-    params: {
-      search,
-      page: 1,
-      perPage: 10,
-    },
-  });
-};
-
+// selected item refs
 const selectedRole = ref(null);
 const selectedBranch = ref(null);
 const selectedSegbis = ref(null);
 const selectedSupervisor = ref(null);
 const selectedChannel = ref(null);
 
+// emit events to parent
 const emit = defineEmits(["submit"]);
 
+// form state
 const form = ref({
   userName: "",
   password: "",
@@ -94,6 +37,7 @@ const form = ref({
 
 const errors = ref({});
 
+// validation logic
 const validate = () => {
   errors.value = {};
 
@@ -128,6 +72,7 @@ const validate = () => {
   return Object.keys(errors.value).length === 0;
 };
 
+// select handlers
 const onRoleSelect = (val) => {
   selectedRole.value = val;
   form.value.idRole = val?.id || val?.idRole || null;
@@ -153,6 +98,7 @@ const onChannelSelect = (val) => {
   form.value.idChannel = val?.id || val?.idChannel || null;
 };
 
+// submit handler
 const handleSubmit = () => {
   if (!validate()) return;
 
