@@ -27,6 +27,8 @@ export const createUser = async (payload) => {
 export const updateUser = async (id, payload) => {
   const requestBody = {
     idUser: parseInt(id),
+    id: parseInt(id),
+    userId: parseInt(id),
     userName: payload.userName,
     password: payload.password,
     name: payload.name,

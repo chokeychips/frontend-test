@@ -2,7 +2,6 @@
 import { ref, watch } from "vue";
 import Autocomplete from "@/components/Autocomplete.vue";
 import {
-  updateUser,
   fetchRole,
   fetchBranch,
   fetchSegbis,
@@ -46,7 +45,7 @@ const errors = ref({});
 
 const loadUser = (u) => {
   if (!u) return;
-  form.value.id = u.id;
+  form.value.id = u.id || u.idUser || u.userId || 0;
   form.value.userName = u.userName || u.username || "";
   form.value.password = "";
   form.value.name = u.name || "";
@@ -155,7 +154,7 @@ const handleSubmit = async () => {
   console.log("  - idBranch:", payload.idBranch, "type:", typeof payload.idBranch);
   console.log("  - idSegbis:", payload.idSegbis, "type:", typeof payload.idSegbis);
 
-  await updateUser(form.value.id, payload);
+  // Emit only: parent will handle request flow + approval workflow
   emit("submit", payload);
 };
 </script>

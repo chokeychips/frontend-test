@@ -18,12 +18,22 @@ const fetchUser = async (id) => {
     error.value = "";
     console.log("[USER] Fetching user with ID from URL:", id, "Type:", typeof id);
 
-    // Since we don't have a single user API, we'll fetch all users and find the one we need
-    const res = await getUserList({ page: 1, perPage: 1000 }); // Fetch more to find the user
+    const res = await getUserList({ page: 1, perPage: 1000 });
     console.log("[USER] Fetched user list count:", res.data.data.length);
     console.log("[USER] First user in list:", res.data.data[0]);
+    console.log("[USER] Sample field check first user:", {
+      id: res.data.data[0]?.id,
+      idUser: res.data.data[0]?.idUser,
+      userId: res.data.data[0]?.userId,
+    });
 
-    const foundUser = res.data.data.find((u) => u.id == id);
+    // Debug: tampilkan semua user ID yang ada
+    console.log(
+      "[USER] All user IDs in list:",
+      res.data.data.map((u) => ({ id: u.id, idUser: u.idUser, name: u.name })),
+    );
+
+    const foundUser = res.data.data.find((u) => u.id == id || u.idUser == id);
     console.log("[USER] Found user:", foundUser);
 
     if (foundUser) {
@@ -32,10 +42,11 @@ const fetchUser = async (id) => {
     } else {
       error.value = "User tidak ditemukan";
       console.error("[USER] User not found. Searching by different ID fields:");
-      // Try alternative ID fields
       res.data.data.forEach((u, idx) => {
         console.log(`[USER] User ${idx}:`, {
-          id: u.idUser,
+          id: u.id,
+          idUser: u.idUser,
+          userId: u.userId,
           userName: u.userName,
           name: u.name,
         });
@@ -87,23 +98,25 @@ const handleEditSubmit = async (data) => {
 
     console.log("[USER] Extracted auditTrailId:", auditTrailId);
 
-    // Try to submit to workflow if audit trail ID found
+    // Bikin flow mirip create: langsung kirim ke workflow kalau dapat idAuditTrail.
     if (auditTrailId) {
       try {
-        console.log("[USER] Submitting to workflow with ID:", auditTrailId);
-        await approveTask(auditTrailId, "User updated and approved");
-        alert("✅ User update berhasil masuk ke workflow!");
+        console.log("[USER] Submitting edit audit trail to workflow:", auditTrailId);
+        await approveTask(auditTrailId, "User edit request approved");
+        alert("✅ User berhasil diperbarui dan workflow disubmit");
       } catch (workflowErr) {
         console.error("[USER] Workflow submit error:", workflowErr);
         console.error("[USER] Workflow error details:", workflowErr.response?.data);
         alert(
-          "⚠️ User diperbarui tapi gagal submit ke workflow: " +
+          "⚠️ User diperbarui, tapi gagal submit ke workflow: " +
             (workflowErr.response?.data?.message || workflowErr.message),
         );
       }
     } else {
-      console.warn("[USER] No audit trail ID found in response, workflow submission skipped");
-      alert("⚠️ User berhasil diperbarui tapi tidak ada audit trail untuk workflow");
+      console.warn("[USER] No audit trail ID found in response, tidak bisa submit workflow");
+      alert(
+        "⚠️ User berhasil diperbarui, tapi auditTrailId tidak ditemukan (workflow tidak dijalankan)",
+      );
     }
 
     setTimeout(() => router.push("/dashboard/users"), 1000);

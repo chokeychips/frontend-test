@@ -1,6 +1,9 @@
 <script setup>
 import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { getMyTaskList, approveTask } from "@/services/workflowService";
+
+const router = useRouter();
 
 const tasks = ref([]);
 const loading = ref(false);
@@ -45,6 +48,81 @@ const openApprovalModal = (task) => {
 const closeApprovalModal = () => {
   selectedTask.value = null;
   approvalReason.value = "";
+};
+
+const parseTaskData = (data) => {
+  if (!data) return null;
+
+  if (typeof data === "string") {
+    try {
+      return JSON.parse(data);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  if (typeof data === "object") {
+    return data;
+  }
+
+  return null;
+};
+
+const findUserId = (obj) => {
+  if (!obj || typeof obj !== "object") return null;
+
+  if (obj.userId) return obj.userId;
+  if (obj.idUser) return obj.idUser;
+  if (obj.user?.id) return obj.user.id;
+  if (obj.id && obj.idAuditTrail == null) return obj.id; // tidak ambil audittrail id
+
+  for (const key of Object.keys(obj)) {
+    const value = obj[key];
+    if (typeof value === "object") {
+      const nested = findUserId(value);
+      if (nested) return nested;
+    }
+  }
+
+  return null;
+};
+
+const getTaskUserId = (task) => {
+  const candidates = [
+    task.userId,
+    task.idUser,
+    task.targetId,
+    task.data?.idUser,
+    task.data?.userId,
+    task.data?.id,
+  ];
+
+  for (const c of candidates) {
+    if (c) return c;
+  }
+
+  const taskData = parseTaskData(task.data);
+  const nestedId = findUserId(taskData);
+  if (nestedId) return nestedId;
+
+  const actionData = parseTaskData(task.action);
+  const nestedActionId = findUserId(actionData);
+  if (nestedActionId) return nestedActionId;
+
+  return null;
+};
+
+const goToEditRequest = (task) => {
+  const userId = getTaskUserId(task);
+  if (!userId) {
+    console.error("MyTask user id lookup failed", task);
+    alert(
+      "Tidak bisa menemukan user ID untuk request ini. Cek console log (task object) dan minta backend menyertakan userId di task data.",
+    );
+    return;
+  }
+
+  router.push(`/dashboard/users/edit/${userId}`);
 };
 
 const handleApprove = async () => {
@@ -139,18 +217,28 @@ onMounted(() => {
             <span v-else class="text-yellow-600 font-semibold">⧖ Pending</span>
           </td>
           <td class="p-2 text-center">
-            <button
-              :disabled="task.approvedBy"
-              @click="openApprovalModal(task)"
-              :class="[
-                'px-4 py-2 rounded font-semibold',
-                task.approvedBy
-                  ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
-                  : 'bg-blue-500 text-white hover:bg-blue-600',
-              ]"
-            >
-              {{ task.approvedBy ? "Sudah Approved" : "Approve Tahap 1" }}
-            </button>
+            <div class="flex flex-col gap-2 items-center">
+              <button
+                :disabled="task.approvedBy"
+                @click="openApprovalModal(task)"
+                :class="[
+                  'px-3 py-2 rounded font-semibold text-sm',
+                  task.approvedBy
+                    ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                    : 'bg-blue-500 text-white hover:bg-blue-600',
+                ]"
+              >
+                {{ task.approvedBy ? "Sudah Approved" : "Approve" }}
+              </button>
+
+              <button
+                v-if="getTaskUserId(task)"
+                @click="goToEditRequest(task)"
+                class="px-3 py-2 rounded font-semibold text-sm bg-yellow-500 text-white hover:bg-yellow-600"
+              >
+                Edit request
+              </button>
+            </div>
           </td>
         </tr>
       </tbody>

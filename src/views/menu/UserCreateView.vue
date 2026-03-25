@@ -58,7 +58,6 @@ const handleCreate = async (data) => {
       }
     } else {
       console.warn("[USER] No audit trail ID found in response, workflow submission skipped");
-      alert("⚠️ User berhasil dibuat tapi tidak ada audit trail untuk workflow");
     }
 
     setTimeout(() => router.push("/dashboard/users"), 1000);
