@@ -56,7 +56,14 @@ export const useAuthStore = defineStore("auth", {
 
     async logoutFromServer() {
       try {
-        await logout();
+        const id = this.user?.id || this.user?.userId || this.user?.idUser;
+        const username = this.user?.username || this.user?.name || "";
+
+        const payload = {};
+        if (id !== undefined && id !== null) payload.id = id;
+        if (username) payload.username = username;
+
+        await logout(payload);
       } catch (err) {
         console.error("[AUTH] Server logout failed:", err.message);
         // Continue local logout even if server request gagal

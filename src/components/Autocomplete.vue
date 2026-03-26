@@ -3,6 +3,7 @@ import { ref, watch } from "vue";
 
 const props = defineProps({
   fetchData: Function,
+  selectedItem: Object,
 });
 
 const emit = defineEmits(["select"]);
@@ -12,6 +13,19 @@ const options = ref([]);
 const show = ref(false);
 
 let timeout = null;
+
+// Watch for selectedItem changes to set initial value
+watch(
+  () => props.selectedItem,
+  (newItem) => {
+    if (newItem) {
+      search.value = newItem.name || "";
+    } else {
+      search.value = "";
+    }
+  },
+  { immediate: true },
+);
 
 const handleSearch = () => {
   clearTimeout(timeout);

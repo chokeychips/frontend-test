@@ -59,11 +59,17 @@ const loadUser = (u) => {
   form.value.idSupervisor = u.idSupervisor || 0;
   form.value.idChannel = u.idChannel || 0;
 
-  selectedRole.value = u.role || null;
-  selectedBranch.value = u.branch || null;
-  selectedSegbis.value = u.segbis || null;
-  selectedSupervisor.value = u.supervisor || null;
-  selectedChannel.value = u.channel || null;
+  // Set selected items - if object exists, use it; otherwise create placeholder
+  selectedRole.value = u.role || (u.idRole ? { id: u.idRole, name: `Role ID: ${u.idRole}` } : null);
+  selectedBranch.value =
+    u.branch || (u.idBranch ? { id: u.idBranch, name: `Branch ID: ${u.idBranch}` } : null);
+  selectedSegbis.value =
+    u.segbis || (u.idSegbis ? { id: u.idSegbis, name: `Segbis ID: ${u.idSegbis}` } : null);
+  selectedSupervisor.value =
+    u.supervisor ||
+    (u.idSupervisor ? { id: u.idSupervisor, name: `Supervisor ID: ${u.idSupervisor}` } : null);
+  selectedChannel.value =
+    u.channel || (u.idChannel ? { id: u.idChannel, name: `Channel ID: ${u.idChannel}` } : null);
 };
 
 // watch user prop for changes
@@ -159,31 +165,47 @@ const handleSubmit = async () => {
     <h2 class="text-lg font-bold">Edit User</h2>
     <div>
       <label class="block font-semibold mb-1">Role</label>
-      <Autocomplete :fetchData="fetchRole" @select="onRoleSelect" />
+      <Autocomplete :fetchData="fetchRole" :selectedItem="selectedRole" @select="onRoleSelect" />
       <p class="text-red-500 text-sm" v-if="errors.idRole">{{ errors.idRole }}</p>
     </div>
 
     <div>
       <label class="block font-semibold mb-1">Branch</label>
-      <Autocomplete :fetchData="fetchBranch" @select="onBranchSelect" />
+      <Autocomplete
+        :fetchData="fetchBranch"
+        :selectedItem="selectedBranch"
+        @select="onBranchSelect"
+      />
       <p class="text-red-500 text-sm" v-if="errors.idBranch">{{ errors.idBranch }}</p>
     </div>
 
     <div>
       <label class="block font-semibold mb-1">Segmen Bisnis</label>
-      <Autocomplete :fetchData="fetchSegbis" @select="onSegbisSelect" />
+      <Autocomplete
+        :fetchData="fetchSegbis"
+        :selectedItem="selectedSegbis"
+        @select="onSegbisSelect"
+      />
       <p class="text-red-500 text-sm" v-if="errors.idSegbis">{{ errors.idSegbis }}</p>
     </div>
 
     <div>
       <label class="block font-semibold mb-1">Supervisor</label>
-      <Autocomplete :fetchData="fetchSupervisor" @select="onSupervisorSelect" />
+      <Autocomplete
+        :fetchData="fetchSupervisor"
+        :selectedItem="selectedSupervisor"
+        @select="onSupervisorSelect"
+      />
       <p class="text-red-500 text-sm" v-if="errors.idSupervisor">{{ errors.idSupervisor }}</p>
     </div>
 
     <div>
       <label class="block font-semibold mb-1">Channel</label>
-      <Autocomplete :fetchData="fetchChannel" @select="onChannelSelect" />
+      <Autocomplete
+        :fetchData="fetchChannel"
+        :selectedItem="selectedChannel"
+        @select="onChannelSelect"
+      />
       <p class="text-red-500 text-sm" v-if="errors.idChannel">{{ errors.idChannel }}</p>
     </div>
 

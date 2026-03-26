@@ -9,8 +9,8 @@ export const login = async (username, password, fcm = "") => {
   return response;
 };
 
-export const logout = async () => {
-  const response = await api.post("/api/auth/logout");
+export const logout = async (payload = {}) => {
+  const response = await api.post("/api/auth/logout", payload);
   return response;
 };
 

@@ -36,9 +36,19 @@ const goTo = (path) => {
   router.push(fullPath);
 };
 
-const logout = () => {
-  auth.logoutFromServer();
-  router.push("/");
+const logout = async () => {
+  const confirmed = window.confirm("Apakah Anda yakin ingin logout?");
+  if (!confirmed) {
+    return;
+  }
+
+  await auth.logoutFromServer();
+
+  // Redirect ke halaman login
+  router.replace("/");
+
+  // Force reload untuk membersihkan semua state tersisa
+  window.location.reload();
 };
 </script>
 

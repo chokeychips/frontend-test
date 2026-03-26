@@ -58,7 +58,7 @@ const handleLogin = async () => {
         errorMessage.value = "❗Sesi aktif terdeteksi; mencoba reset sesi dan login ulang...";
 
         try {
-          await logout();
+          await logout({ username: username.value });
           authStore.logout();
           localStorage.removeItem("token");
           sessionStorage.removeItem("token");
