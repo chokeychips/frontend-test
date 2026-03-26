@@ -11,6 +11,7 @@ const emit = defineEmits(["select"]);
 const search = ref("");
 const options = ref([]);
 const show = ref(false);
+const isLoading = ref(false);
 
 let timeout = null;
 
@@ -30,12 +31,8 @@ watch(
 const handleSearch = () => {
   clearTimeout(timeout);
 
-  if (!search.value) {
-    options.value = [];
-    return;
-  }
-
   timeout = setTimeout(async () => {
+    isLoading.value = true;
     try {
       const res = await props.fetchData(search.value);
 
@@ -62,6 +59,8 @@ const handleSearch = () => {
     } catch (err) {
       console.error("[AUTOCOMPLETE] Error fetching options:", err);
       options.value = [];
+    } finally {
+      isLoading.value = false;
     }
   }, 500);
 };
@@ -83,18 +82,19 @@ const hideDropdown = () => {
   <div class="relative">
     <input
       v-model="search"
-      @focus="show = true"
+      @focus="
+        show = true;
+        handleSearch();
+      "
       @blur="hideDropdown"
       @input="handleSearch"
       class="border p-2 w-full"
       placeholder="Search..."
     />
 
-    <div
-      v-if="show && search.length > 0"
-      class="absolute bg-white border w-full max-h-40 overflow-auto z-10"
-    >
-      <div v-if="options.length === 0" class="p-2 text-gray-500">Tidak ada hasil</div>
+    <div v-if="show" class="absolute bg-white border w-full max-h-40 overflow-auto z-10">
+      <div v-if="isLoading" class="p-2 text-gray-500">Memuat...</div>
+      <div v-else-if="options.length === 0" class="p-2 text-gray-500">Tidak ada hasil</div>
 
       <div
         v-for="item in options"
