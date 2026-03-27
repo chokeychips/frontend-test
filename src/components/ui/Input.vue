@@ -1,8 +1,15 @@
 <script setup>
-import { useAttrs } from "vue";
+import { useAttrs, getCurrentInstance, computed } from "vue";
 
 const attrs = useAttrs();
+const instance = getCurrentInstance();
+const uid = instance?.uid ?? Math.random().toString(36).slice(2, 10);
+
 const props = defineProps({
+  id: {
+    type: String,
+    default: "",
+  },
   modelValue: {
     type: [String, Number],
     default: "",
@@ -38,6 +45,8 @@ const props = defineProps({
   },
 });
 
+const computedId = computed(() => props.id || `input-${uid}`);
+
 const emit = defineEmits(["update:modelValue", "input", "blur", "focus"]);
 
 const sizeClasses = {
@@ -62,13 +71,13 @@ const handleFocus = (event) => {
 
 <template>
   <div class="w-full">
-    <label v-if="label" :for="`input-${_uid}`" class="block text-sm font-medium text-gray-700 mb-1">
+    <label v-if="label" :for="computedId" class="block text-sm font-medium text-gray-700 mb-1">
       {{ label }}
       <span v-if="required" class="text-red-500">*</span>
     </label>
 
     <input
-      :id="`input-${_uid}`"
+      :id="computedId"
       :type="type"
       :value="modelValue"
       :placeholder="placeholder"

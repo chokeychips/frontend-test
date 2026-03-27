@@ -1,5 +1,11 @@
 <script setup>
+import { getCurrentInstance, computed } from "vue";
+
 const props = defineProps({
+  id: {
+    type: String,
+    default: "",
+  },
   modelValue: {
     type: String,
     default: "",
@@ -35,6 +41,10 @@ const props = defineProps({
   },
 });
 
+const instance = getCurrentInstance();
+const uid = instance?.uid ?? Math.random().toString(36).slice(2, 10);
+const computedId = computed(() => props.id || `textarea-${uid}`);
+
 const emit = defineEmits(["update:modelValue", "input", "blur", "focus"]);
 
 const sizeClasses = {
@@ -59,17 +69,13 @@ const handleFocus = (event) => {
 
 <template>
   <div class="w-full">
-    <label
-      v-if="label"
-      :for="`textarea-${_uid}`"
-      class="block text-sm font-medium text-gray-700 mb-1"
-    >
+    <label v-if="label" :for="computedId" class="block text-sm font-medium text-gray-700 mb-1">
       {{ label }}
       <span v-if="required" class="text-red-500">*</span>
     </label>
 
     <textarea
-      :id="`textarea-${_uid}`"
+      :id="computedId"
       :value="modelValue"
       :placeholder="placeholder"
       :disabled="disabled"
