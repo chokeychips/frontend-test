@@ -3,6 +3,7 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { getMyTaskList, approveTask } from "@/services/workflowService";
+import { UiButton } from "@/components/ui";
 
 // router helper
 const router = useRouter();
@@ -178,13 +179,9 @@ onMounted(() => {
     <div class="flex justify-between items-center mb-4">
       <h1 class="text-xl font-bold">My Task (Maintenance Approval)</h1>
       <div class="flex gap-2">
-        <button
-          @click="fetchTasks"
-          :disabled="loading"
-          class="px-3 py-2 rounded text-sm font-semibold bg-green-500 text-white hover:bg-green-600 disabled:opacity-50"
-        >
+        <UiButton @click="fetchTasks" :disabled="loading" variant="success" size="sm">
           {{ loading ? "Loading..." : "🔄 Refresh" }}
-        </button>
+        </UiButton>
       </div>
     </div>
 
@@ -223,7 +220,7 @@ onMounted(() => {
           </td>
           <td class="p-2 text-center">
             <div class="flex flex-col gap-2 items-center">
-              <button
+              <UiButton
                 :disabled="task.approvedBy"
                 @click="openApprovalModal(task)"
                 :class="[
@@ -234,15 +231,15 @@ onMounted(() => {
                 ]"
               >
                 {{ task.approvedBy ? "Sudah Approved" : "Approve" }}
-              </button>
+              </UiButton>
 
-              <button
+              <UiButton
                 v-if="getTaskUserId(task)"
                 @click="goToEditRequest(task)"
                 class="px-3 py-2 rounded font-semibold text-sm bg-yellow-500 text-white hover:bg-yellow-600"
               >
                 Edit request
-              </button>
+              </UiButton>
             </div>
           </td>
         </tr>
@@ -287,20 +284,17 @@ onMounted(() => {
         </div>
 
         <div class="flex gap-2 justify-end">
-          <button
-            @click="closeApprovalModal"
-            :disabled="isSubmitting"
-            class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 disabled:opacity-50"
-          >
+          <UiButton @click="closeApprovalModal" :disabled="isSubmitting" variant="secondary">
             Cancel
-          </button>
-          <button
+          </UiButton>
+          <UiButton
             @click="handleApprove"
             :disabled="isSubmitting"
-            class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 disabled:opacity-50"
+            variant="success"
+            :loading="isSubmitting"
           >
             {{ isSubmitting ? "Submitting..." : "Approve" }}
-          </button>
+          </UiButton>
         </div>
       </div>
     </div>

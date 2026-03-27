@@ -26,8 +26,6 @@ export const useAuthStore = defineStore("auth", {
         await this.getProfile();
         return true;
       } catch (err) {
-        console.error("[AUTH] Token validation failed:", err.message);
-
         localStorage.removeItem("token");
         this.isAuthenticated = false;
         this.user = null;
@@ -41,9 +39,7 @@ export const useAuthStore = defineStore("auth", {
 
         this.user = res.data.data[0];
       } catch (err) {
-        console.error("[AUTH] Failed to fetch profile:", err.message);
-        console.error("[AUTH] Profile fetch error status:", err.response?.status);
-        // Don't throw - just log, profile is optional after token validation
+        // Jangan lempar error di UI, profile mungkin opsional
       }
     },
 
@@ -65,7 +61,6 @@ export const useAuthStore = defineStore("auth", {
 
         await logout(payload);
       } catch (err) {
-        console.error("[AUTH] Server logout failed:", err.message);
         // Continue local logout even if server request gagal
       } finally {
         this.logout();

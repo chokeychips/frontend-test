@@ -2,6 +2,7 @@
 // component imports
 import { ref } from "vue";
 import Autocomplete from "@/components/Autocomplete.vue";
+import { UiButton } from "@/components/ui";
 import {
   fetchRole,
   fetchBranch,
@@ -197,6 +198,6 @@ const handleSubmit = () => {
     <p class="text-red-500 text-sm" v-if="errors.idSupervisor">{{ errors.idSupervisor }}</p>
     <p class="text-red-500 text-sm" v-if="errors.idChannel">{{ errors.idChannel }}</p>
 
-    <button @click="handleSubmit" class="bg-blue-500 text-white px-4 py-2">Submit</button>
+    <UiButton @click="handleSubmit" variant="primary">Submit</UiButton>
   </div>
 </template>

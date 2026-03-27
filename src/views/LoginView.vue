@@ -3,6 +3,7 @@ import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { login, logout } from "@/services/authService";
+import { UiButton } from "@/components/ui";
 
 const username = ref("");
 const password = ref("");
@@ -167,13 +168,9 @@ const handleKeyPress = (e) => {
       </div>
 
       <!-- Login Button -->
-      <button
-        @click="handleLogin"
-        :disabled="isLoading"
-        class="w-full bg-blue-500 text-white font-bold py-2 rounded-lg hover:bg-blue-600 disabled:bg-gray-400 transition"
-      >
+      <UiButton @click="handleLogin" :disabled="isLoading" variant="primary" class="w-full">
         {{ isLoading ? "Menunggu..." : "Login" }}
-      </button>
+      </UiButton>
     </div>
   </div>
 </template>

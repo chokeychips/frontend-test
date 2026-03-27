@@ -81,13 +81,9 @@ onMounted(() => {
     <div class="flex justify-between items-center mb-4">
       <h1 class="text-xl font-bold">List Approval (Final Approval)</h1>
       <div class="flex gap-2">
-        <button
-          @click="fetchApprovals"
-          :disabled="loading"
-          class="px-3 py-2 rounded text-sm font-semibold bg-green-500 text-white hover:bg-green-600 disabled:opacity-50"
-        >
+        <UiButton @click="fetchApprovals" :disabled="loading" variant="success" size="sm">
           {{ loading ? "Loading..." : "🔄 Refresh" }}
-        </button>
+        </UiButton>
       </div>
     </div>
 
@@ -135,12 +131,9 @@ onMounted(() => {
             <span v-else class="text-yellow-600">-</span>
           </td>
           <td class="p-2 text-center">
-            <button
-              @click="openApprovalModal(approval)"
-              class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-            >
+            <UiButton @click="openApprovalModal(approval)" variant="success" size="sm">
               Approve Final
-            </button>
+            </UiButton>
           </td>
         </tr>
       </tbody>

@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch } from "vue";
 import Autocomplete from "@/components/Autocomplete.vue";
+import { UiButton } from "@/components/ui";
 import {
   fetchRole,
   fetchBranch,
@@ -237,18 +238,8 @@ const handleSubmit = async () => {
     </div>
 
     <div class="flex gap-2">
-      <button
-        @click="handleSubmit"
-        class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-      >
-        Save Changes
-      </button>
-      <button
-        @click="emit('cancel')"
-        class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-      >
-        Cancel
-      </button>
+      <UiButton @click="handleSubmit" variant="primary"> Save Changes </UiButton>
+      <UiButton @click="emit('cancel')" variant="secondary"> Cancel </UiButton>
     </div>
   </div>
 </template>

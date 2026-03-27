@@ -15,7 +15,7 @@ export const logout = async (payload = {}) => {
 };
 
 export const checkToken = async () => {
-  const response = await api.post("/api/auth/checktoken");
+  const response = await api.post("/api/auth/refresh");
   return response;
 };
 

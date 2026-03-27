@@ -95,13 +95,9 @@ onMounted(() => {
     </div>
 
     <!-- Add User Button -->
-    <button
-      v-if="!loading && !error"
-      @click="handleCreateUser"
-      class="mb-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-    >
+    <UiButton v-if="!loading && !error" @click="handleCreateUser" variant="success" class="mb-4">
       + Add User
-    </button>
+    </UiButton>
 
     <!-- Table -->
     <UiTable
@@ -139,33 +135,34 @@ onMounted(() => {
       </div>
 
       <div class="flex gap-2">
-        <button
-          @click="prevPage"
-          :disabled="page === 1"
-          class="px-4 py-2 bg-gray-300 disabled:opacity-50 rounded hover:bg-gray-400"
-        >
+        <UiButton @click="prevPage" :disabled="page === 1" variant="secondary" class="px-4 py-2">
           ← Previous
-        </button>
+        </UiButton>
 
         <div class="flex gap-1">
-          <button
+          <UiButton
             v-for="pageNum in totalPages"
             :key="pageNum"
             @click="goToPage(pageNum)"
-            :class="page === pageNum ? 'bg-blue-600 text-white' : 'bg-gray-200 hover:bg-gray-300'"
-            class="px-3 py-2 rounded"
+            :class="[
+              page === pageNum ? 'bg-blue-600 text-white' : 'bg-gray-200 hover:bg-gray-300',
+              'px-3 py-2 rounded',
+            ]"
+            variant="secondary"
+            size="sm"
           >
             {{ pageNum }}
-          </button>
+          </UiButton>
         </div>
 
-        <button
+        <UiButton
           @click="nextPage"
           :disabled="page >= totalPages"
-          class="px-4 py-2 bg-gray-300 disabled:opacity-50 rounded hover:bg-gray-400"
+          variant="secondary"
+          class="px-4 py-2"
         >
           Next →
-        </button>
+        </UiButton>
       </div>
     </div>
   </div>

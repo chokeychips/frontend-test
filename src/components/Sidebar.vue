@@ -2,6 +2,7 @@
 import { onMounted } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { useRouter } from "vue-router";
+import { UiButton } from "@/components/ui";
 import "@/assets/scrollbar.css";
 
 const auth = useAuthStore();
@@ -80,11 +81,6 @@ const logout = async () => {
       <div v-else>Loading menu...</div>
     </div>
 
-    <button
-      @click="logout"
-      class="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded mt-4"
-    >
-      Logout
-    </button>
+    <UiButton @click="logout" variant="danger" class="w-full mt-4"> Logout </UiButton>
   </div>
 </template>
