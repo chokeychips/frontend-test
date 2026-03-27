@@ -1,9 +1,11 @@
 import api from "./api";
 
+//GET USER
 export const getUserList = async (params) => {
   return await api.get("/api/user/list", { params });
 };
 
+// CREATE USER
 export const createUser = async (payload) => {
   const requestBody = {
     userName: payload.userName || "",
@@ -24,6 +26,7 @@ export const createUser = async (payload) => {
   return res;
 };
 
+//UPDATE USER
 export const updateUser = async (id, payload) => {
   const requestBody = {
     idUser: parseInt(id),
@@ -49,6 +52,7 @@ export const updateUser = async (id, payload) => {
   return res;
 };
 
+//GET ROLE
 export const fetchRole = async (search) => {
   return await api.get("/api/role/list", {
     params: {
@@ -59,6 +63,7 @@ export const fetchRole = async (search) => {
   });
 };
 
+//GET BRANCH
 export const fetchBranch = async (search) => {
   return await api.get("/api/branch/list", {
     params: {
@@ -69,6 +74,7 @@ export const fetchBranch = async (search) => {
   });
 };
 
+//GET SEGBIS
 export const fetchSegbis = async (search) => {
   const keyword = search?.trim() || "";
 
@@ -82,6 +88,7 @@ export const fetchSegbis = async (search) => {
   });
 };
 
+//GET SUPERVISOR
 export const fetchSupervisor = async (search) => {
   const keyword = search?.trim() || "";
 
@@ -104,6 +111,7 @@ export const fetchSupervisor = async (search) => {
   return response;
 };
 
+//GET CHANNEL
 export const fetchChannel = async (search) => {
   return await api.get("/api/channel/list", {
     params: {

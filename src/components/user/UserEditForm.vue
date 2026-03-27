@@ -1,7 +1,7 @@
 <script setup>
 import { ref, watch } from "vue";
 import Autocomplete from "@/components/Autocomplete.vue";
-import { UiButton } from "@/components/ui";
+import { UiInput, UiButton } from "@/components/ui";
 import {
   fetchRole,
   fetchBranch,
@@ -211,29 +211,28 @@ const handleSubmit = async () => {
     </div>
 
     <div>
-      <label class="block font-semibold mb-1">Username</label>
-      <input v-model="form.userName" class="border p-2 w-full" />
+      <UiInput v-model="form.userName" label="Username" placeholder="Masukkan username" required />
     </div>
     <div>
-      <label class="block font-semibold mb-1">Password (biarkan kosong jika tidak diubah)</label>
-      <input type="password" v-model="form.password" class="border p-2 w-full" />
+      <UiInput
+        v-model="form.password"
+        type="password"
+        label="Password (biarkan kosong jika tidak diubah)"
+        placeholder="Masukkan password"
+      />
     </div>
     <div>
-      <label class="block font-semibold mb-1">Name</label>
-      <input v-model="form.name" class="border p-2 w-full" />
+      <UiInput v-model="form.name" label="Name" placeholder="Masukkan nama" />
     </div>
     <div>
-      <label class="block font-semibold mb-1">Phone</label>
-      <input v-model="form.hp" class="border p-2 w-full" />
+      <UiInput v-model="form.hp" label="Phone" placeholder="Masukkan nomor telepon" />
     </div>
     <div>
-      <label class="block font-semibold mb-1">NIK</label>
-      <input v-model="form.nik" class="border p-2 w-full" />
+      <UiInput v-model="form.nik" label="NIK" placeholder="Masukkan NIK" />
       <p class="text-red-500 text-sm" v-if="errors.nik">{{ errors.nik }}</p>
     </div>
     <div>
-      <label class="block font-semibold mb-1">Email</label>
-      <input v-model="form.email" class="border p-2 w-full" />
+      <UiInput v-model="form.email" label="Email" placeholder="Masukkan email" />
       <p class="text-red-500 text-sm" v-if="errors.email">{{ errors.email }}</p>
     </div>
 

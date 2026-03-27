@@ -2,7 +2,7 @@
 // component imports
 import { ref } from "vue";
 import Autocomplete from "@/components/Autocomplete.vue";
-import { UiButton } from "@/components/ui";
+import { UiInput, UiButton } from "@/components/ui";
 import {
   fetchRole,
   fetchBranch,
@@ -161,34 +161,40 @@ const handleSubmit = () => {
     </div>
 
     <div>
-      <label class="block font-semibold mb-1" for="userName">Username</label>
-      <input id="userName" v-model="form.userName" class="border p-2 w-full" />
+      <UiInput
+        id="userName"
+        v-model="form.userName"
+        label="Username"
+        placeholder="Masukkan username"
+        required
+      />
     </div>
 
     <div>
-      <label class="block font-semibold mb-1" for="password">Password</label>
-      <input id="password" v-model="form.password" type="password" class="border p-2 w-full" />
+      <UiInput
+        id="password"
+        type="password"
+        v-model="form.password"
+        label="Password"
+        placeholder="Masukkan password"
+      />
     </div>
 
     <div>
-      <label class="block font-semibold mb-1" for="name">Name</label>
-      <input id="name" v-model="form.name" class="border p-2 w-full" />
+      <UiInput id="name" v-model="form.name" label="Name" placeholder="Masukkan nama" />
     </div>
 
     <div>
-      <label class="block font-semibold mb-1" for="hp">Phone</label>
-      <input id="hp" v-model="form.hp" class="border p-2 w-full" />
+      <UiInput id="hp" v-model="form.hp" label="Phone" placeholder="Masukkan nomor telepon" />
     </div>
 
     <div>
-      <label class="block font-semibold mb-1" for="nik">NIK</label>
-      <input id="nik" v-model="form.nik" class="border p-2 w-full" />
+      <UiInput id="nik" v-model="form.nik" label="NIK" placeholder="Masukkan NIK" />
       <p class="text-red-500 text-sm" v-if="errors.nik">{{ errors.nik }}</p>
     </div>
 
     <div>
-      <label class="block font-semibold mb-1" for="email">Email</label>
-      <input id="email" v-model="form.email" class="border p-2 w-full" />
+      <UiInput id="email" v-model="form.email" label="Email" placeholder="Masukkan email" />
       <p class="text-red-500 text-sm" v-if="errors.email">{{ errors.email }}</p>
     </div>
 

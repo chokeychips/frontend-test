@@ -1,4 +1,7 @@
 <script setup>
+import { useAttrs } from "vue";
+
+const attrs = useAttrs();
 const props = defineProps({
   modelValue: {
     type: [String, Number],
@@ -76,6 +79,7 @@ const handleFocus = (event) => {
         sizeClasses[size],
         error ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300',
       ]"
+      v-bind="attrs"
       @input="handleInput"
       @blur="handleBlur"
       @focus="handleFocus"

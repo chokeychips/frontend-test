@@ -3,7 +3,7 @@ import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { login, logout } from "@/services/authService";
-import { UiButton } from "@/components/ui";
+import { UiButton, UiInput } from "@/components/ui";
 
 const username = ref("");
 const password = ref("");
@@ -143,27 +143,24 @@ const handleKeyPress = (e) => {
 
       <!-- Username Input -->
       <div class="mb-4">
-        <label class="block text-gray-700 text-sm font-bold mb-2">Username</label>
-        <input
+        <UiInput
           v-model="username"
-          type="text"
           placeholder="Masukkan username"
           @keypress="handleKeyPress"
-          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
           :disabled="isLoading"
+          label="Username"
         />
       </div>
 
       <!-- Password Input -->
       <div class="mb-6">
-        <label class="block text-gray-700 text-sm font-bold mb-2">Password</label>
-        <input
+        <UiInput
           v-model="password"
           type="password"
           placeholder="Masukkan password"
           @keypress="handleKeyPress"
-          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
           :disabled="isLoading"
+          label="Password"
         />
       </div>
 
