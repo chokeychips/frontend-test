@@ -1,9 +1,9 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, defineComponent, h } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { useRouter, useRoute } from "vue-router";
 
-// 👉 import icon
+// import icon
 import {
   LayoutDashboard,
   Users,
@@ -68,12 +68,11 @@ const iconMap = {
   dashboard: LayoutDashboard,
 };
 
-const renderIcon = (icon) => {
+const resolveLucideIcon = (icon) => {
   if (!icon) return LayoutDashboard;
   const key = icon.toString().toLowerCase();
   if (iconMap[key]) return iconMap[key];
 
-  // map common keywords if API returns generic names
   if (key.includes("user")) return Users;
   if (key.includes("approval") || key.includes("check")) return CheckCircle;
   if (key.includes("maintenance") || key.includes("setting")) return Settings;
@@ -81,6 +80,51 @@ const renderIcon = (icon) => {
 
   return LayoutDashboard;
 };
+
+const SidebarIcon = defineComponent({
+  name: "SidebarIcon",
+  inheritAttrs: false,
+  props: {
+    icon: {
+      type: [String, Object],
+      default: null,
+    },
+    fallback: {
+      type: Object,
+      default: () => LayoutDashboard,
+    },
+  },
+  setup(props, { attrs }) {
+    return () => {
+      const iconValue = props.icon ? props.icon.toString().trim() : null;
+      const className = attrs.class || "";
+
+      if (!iconValue || iconValue.toLowerCase() === "null") {
+        return h(props.fallback, { class: className });
+      }
+
+      if (iconValue.startsWith("<svg")) {
+        return h("span", {
+          class: className,
+          innerHTML: iconValue,
+          role: "img",
+          "aria-hidden": "true",
+        });
+      }
+
+      if (/^https?:\/\/.+\.svg$/i.test(iconValue) || iconValue.endsWith(".svg")) {
+        return h("img", {
+          src: iconValue,
+          class: className,
+          alt: "menu icon",
+        });
+      }
+
+      const lucideIcon = resolveLucideIcon(iconValue);
+      return h(lucideIcon, { class: className });
+    };
+  },
+});
 </script>
 
 <template>
@@ -99,7 +143,7 @@ const renderIcon = (icon) => {
             @click="toggleMenu(menu.menuId)"
           >
             <div class="flex items-center gap-3">
-              <component :is="renderIcon(menu.icon || menu.key)" class="w-5 h-5" />
+              <SidebarIcon :icon="menu.icon || menu.key" class="w-5 h-5" />
               <span class="font-medium">{{ menu.title }}</span>
             </div>
 
@@ -123,7 +167,7 @@ const renderIcon = (icon) => {
                     : 'hover:bg-gray-800'
                 "
               >
-                <component :is="renderIcon(child.icon || child.key)" class="w-6 h-6" />
+                <SidebarIcon :icon="child.icon || child.key" class="w-6 h-6" />
                 <span>{{ child.title }}</span>
               </div>
             </div>

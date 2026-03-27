@@ -1,30 +1,38 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
-
-import Login from "@/views/LoginView.vue";
-import Dashboard from "@/views/DashboardView.vue";
-import User from "@/views/menu/UserView.vue";
-import UserCreate from "@/views/menu/UserCreateView.vue";
-import UserEdit from "@/views/menu/UserEditView.vue";
-import MyTask from "@/views/menu/MyTaskView.vue";
-import Approval from "@/views/menu/ApprovalView.vue";
-import Maintenance from "@/views/menu/MaintenanceView.vue";
+import { ROUTE_PATHS, COMPONENTS } from "@/constants/routes";
 
 const routes = [
-  { path: "/", component: Login },
+  { path: ROUTE_PATHS.LOGIN, component: COMPONENTS.Login },
 
   {
-    path: "/dashboard",
-    component: Dashboard,
+    path: ROUTE_PATHS.DASHBOARD,
+    component: COMPONENTS.Dashboard,
     meta: { requiresAuth: true },
     children: [
-      { path: "users", component: User, meta: { requiresAuth: true } },
-      { path: "users/create", component: UserCreate, meta: { requiresAuth: true } },
-      { path: "users/edit/:id", component: UserEdit, meta: { requiresAuth: true } },
-      { path: "mytask-maintenance", component: MyTask, meta: { requiresAuth: true } },
-      { path: "approval", component: Approval, meta: { requiresAuth: true } },
-      { path: "maintenance", component: Maintenance, meta: { requiresAuth: true } },
-      { path: ":pathMatch(.*)*", redirect: "/dashboard/maintenance" },
+      { path: ROUTE_PATHS.USERS, component: COMPONENTS.User, meta: { requiresAuth: true } },
+      {
+        path: ROUTE_PATHS.USERS_CREATE,
+        component: COMPONENTS.UserCreate,
+        meta: { requiresAuth: true },
+      },
+      {
+        path: ROUTE_PATHS.USERS_EDIT,
+        component: COMPONENTS.UserEdit,
+        meta: { requiresAuth: true },
+      },
+      {
+        path: ROUTE_PATHS.MYTASK_MAINTENANCE,
+        component: COMPONENTS.MyTask,
+        meta: { requiresAuth: true },
+      },
+      { path: ROUTE_PATHS.APPROVAL, component: COMPONENTS.Approval, meta: { requiresAuth: true } },
+      {
+        path: ROUTE_PATHS.MAINTENANCE,
+        component: COMPONENTS.Maintenance,
+        meta: { requiresAuth: true },
+      },
+      { path: ":pathMatch(.*)*", redirect: `${ROUTE_PATHS.DASHBOARD}/${ROUTE_PATHS.MAINTENANCE}` },
     ],
   },
 ];
@@ -39,15 +47,15 @@ router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
 
   // If trying to access login page and already authenticated, redirect to dashboard
-  if (to.path === "/" && authStore.isAuthenticated) {
-    next("/dashboard");
+  if (to.path === ROUTE_PATHS.LOGIN && authStore.isAuthenticated) {
+    next(ROUTE_PATHS.DASHBOARD);
     return;
   }
 
   if (to.meta.requiresAuth) {
     const token = localStorage.getItem("token");
     if (!token) {
-      next("/");
+      next(ROUTE_PATHS.LOGIN);
       return;
     }
 
