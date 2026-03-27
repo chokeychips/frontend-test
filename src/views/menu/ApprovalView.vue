@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { getApprovalList, processApproval } from "@/services/workflowService";
-import { UiModal, UiTextarea, UiButton } from "@/components/ui";
+import { UiModal, UiTextarea, UiButton, UiTable } from "@/components/ui";
 
 const approvals = ref([]);
 const loading = ref(false);
@@ -9,6 +9,14 @@ const error = ref("");
 const selectedApproval = ref(null);
 const approvalReason = ref("");
 const isSubmitting = ref(false);
+
+const approvalColumns = [
+  { key: "id", label: "ID" },
+  { key: "createdBy", label: "Created By" },
+  { key: "createdDate", label: "Created Date" },
+  { key: "approvedBy", label: "Approved By" },
+  { key: "approvedDate", label: "Approved Date" },
+];
 
 const fetchApprovals = async () => {
   try {
@@ -96,48 +104,38 @@ onMounted(() => {
     </div>
 
     <!-- Table -->
-    <table v-if="!loading && approvals.length > 0" class="w-full border">
-      <thead>
-        <tr class="bg-gray-200">
-          <th class="p-2">ID</th>
-          <th class="p-2">Created By</th>
-          <th class="p-2">Created Date</th>
-          <th class="p-2">Approved By</th>
-          <th class="p-2">Approved Date</th>
-          <th class="p-2">Action</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr v-for="approval in approvals" :key="approval.id || approval.idAuditTrail">
-          <td class="p-2 font-mono font-bold text-center">
-            {{ approval.id || "-" }}
-          </td>
-          <td class="p-2 text-center">
-            {{ approval.createdBy?.name || approval.createdBy || "-" }}
-          </td>
-          <td class="p-2 text-center text-sm">
-            {{ approval.createdDate ? new Date(approval.createdDate).toLocaleString() : "-" }}
-          </td>
-          <td class="p-2 text-center">
-            <span v-if="approval.approvedBy?.name">{{ approval.approvedBy.name }}</span>
-            <span v-else-if="approval.approvedBy">{{ approval.approvedBy }}</span>
-            <span v-else class="text-yellow-600 font-semibold">⧖ Pending Tahap 1</span>
-          </td>
-          <td class="p-2 text-center text-sm">
-            <span v-if="approval.approvedDate">{{
-              new Date(approval.approvedDate).toLocaleString()
-            }}</span>
-            <span v-else class="text-yellow-600">-</span>
-          </td>
-          <td class="p-2 text-center">
-            <UiButton @click="openApprovalModal(approval)" variant="success" size="sm">
-              Approve Final
-            </UiButton>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <UiTable
+      :columns="approvalColumns"
+      :data="approvals"
+      :loading="loading"
+      empty-message="Tidak ada approval untuk di-proses"
+      show-actions
+      actions-label="Action"
+    >
+      <template #id="{ item }">
+        <span class="font-mono font-bold">{{ item.id || "-" }}</span>
+      </template>
+      <template #createdBy="{ item }">
+        {{ item.createdBy?.name || item.createdBy || "-" }}
+      </template>
+      <template #createdDate="{ item }">
+        {{ item.createdDate ? new Date(item.createdDate).toLocaleString() : "-" }}
+      </template>
+      <template #approvedBy="{ item }">
+        <span v-if="item.approvedBy?.name">{{ item.approvedBy.name }}</span>
+        <span v-else-if="item.approvedBy">{{ item.approvedBy }}</span>
+        <span v-else class="text-yellow-600 font-semibold">⧖ Pending Tahap 1</span>
+      </template>
+      <template #approvedDate="{ item }">
+        <span v-if="item.approvedDate">{{ new Date(item.approvedDate).toLocaleString() }}</span>
+        <span v-else class="text-yellow-600">-</span>
+      </template>
+      <template #actions="{ item }">
+        <UiButton @click="openApprovalModal(item)" variant="success" size="sm">
+          Approve Final
+        </UiButton>
+      </template>
+    </UiTable>
 
     <!-- No Data -->
     <div

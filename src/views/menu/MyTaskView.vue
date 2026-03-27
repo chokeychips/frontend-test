@@ -3,7 +3,7 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { getMyTaskList, approveTask } from "@/services/workflowService";
-import { UiButton } from "@/components/ui";
+import { UiButton, UiModal, UiTextarea, UiTable } from "@/components/ui";
 
 // router helper
 const router = useRouter();
@@ -15,6 +15,13 @@ const error = ref("");
 const selectedTask = ref(null);
 const approvalReason = ref("");
 const isSubmitting = ref(false);
+
+const taskColumns = [
+  { key: "idAuditTrail", label: "ID Audit Trail" },
+  { key: "createdBy", label: "Created By" },
+  { key: "createdDate", label: "Created Date" },
+  { key: "status", label: "Status" },
+];
 
 // fetch task list dari backend
 const fetchTasks = async () => {
@@ -194,57 +201,52 @@ onMounted(() => {
     </div>
 
     <!-- Table -->
-    <table v-if="!loading && tasks.length > 0" class="w-full border">
-      <thead>
-        <tr class="bg-gray-200">
-          <th class="p-2">ID Audit Trail</th>
-          <th class="p-2">Created By</th>
-          <th class="p-2">Created Date</th>
-          <th class="p-2">Status</th>
-          <th class="p-2">Action</th>
-        </tr>
-      </thead>
+    <UiTable
+      :columns="taskColumns"
+      :data="tasks"
+      :loading="loading"
+      empty-message="Tidak ada task untuk di-approve"
+      show-actions
+      actions-label="Action"
+    >
+      <template #idAuditTrail="{ item }">
+        <span class="font-mono font-bold">{{ item.idAuditTrail || item.id || "-" }}</span>
+      </template>
+      <template #createdBy="{ item }">
+        {{ item.createdBy?.name || item.createdBy || "-" }}
+      </template>
+      <template #createdDate="{ item }">
+        {{ item.createdDate ? new Date(item.createdDate).toLocaleString() : "-" }}
+      </template>
+      <template #status="{ item }">
+        <span v-if="item.approvedBy" class="text-green-600 font-semibold">✓ Approved</span>
+        <span v-else class="text-yellow-600 font-semibold">⧖ Pending</span>
+      </template>
+      <template #actions="{ item }">
+        <div class="flex flex-col gap-2 items-center">
+          <UiButton
+            :disabled="item.approvedBy"
+            @click="openApprovalModal(item)"
+            :class="[
+              'px-3 py-2 rounded font-semibold text-sm',
+              item.approvedBy
+                ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                : 'bg-blue-500 text-white hover:bg-blue-600',
+            ]"
+          >
+            {{ item.approvedBy ? "Sudah Approved" : "Approve" }}
+          </UiButton>
 
-      <tbody>
-        <tr v-for="task in tasks" :key="task.idAuditTrail || task.id">
-          <td class="p-2 font-mono font-bold text-center">
-            {{ task.idAuditTrail || task.id || "-" }}
-          </td>
-          <td class="p-2 text-center">{{ task.createdBy?.name || task.createdBy || "-" }}</td>
-          <td class="p-2 text-sm text-center">
-            {{ task.createdDate ? new Date(task.createdDate).toLocaleString() : "-" }}
-          </td>
-          <td class="p-2 text-center">
-            <span v-if="task.approvedBy" class="text-green-600 font-semibold">✓ Approved</span>
-            <span v-else class="text-yellow-600 font-semibold">⧖ Pending</span>
-          </td>
-          <td class="p-2 text-center">
-            <div class="flex flex-col gap-2 items-center">
-              <UiButton
-                :disabled="task.approvedBy"
-                @click="openApprovalModal(task)"
-                :class="[
-                  'px-3 py-2 rounded font-semibold text-sm',
-                  task.approvedBy
-                    ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
-                    : 'bg-blue-500 text-white hover:bg-blue-600',
-                ]"
-              >
-                {{ task.approvedBy ? "Sudah Approved" : "Approve" }}
-              </UiButton>
-
-              <UiButton
-                v-if="getTaskUserId(task)"
-                @click="goToEditRequest(task)"
-                class="px-3 py-2 rounded font-semibold text-sm bg-yellow-500 text-white hover:bg-yellow-600"
-              >
-                Edit request
-              </UiButton>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+          <UiButton
+            v-if="getTaskUserId(item)"
+            @click="goToEditRequest(item)"
+            class="px-3 py-2 rounded font-semibold text-sm bg-yellow-500 text-white hover:bg-yellow-600"
+          >
+            Edit request
+          </UiButton>
+        </div>
+      </template>
+    </UiTable>
 
     <!-- No Data -->
     <div
@@ -256,47 +258,45 @@ onMounted(() => {
     </div>
 
     <!-- Approval Modal -->
-    <div
-      v-if="selectedTask"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    <UiModal
+      :show="!!selectedTask"
+      title="Approve Task"
+      size="md"
+      :loading="isSubmitting"
+      @close="closeApprovalModal"
     >
-      <div class="bg-white p-6 rounded-lg shadow-lg w-96">
-        <h2 class="text-lg font-bold mb-4">Approve Task</h2>
-
-        <div class="mb-4">
+      <div class="space-y-4">
+        <div>
           <label class="block text-sm font-semibold mb-2">ID Audit Trail</label>
           <p class="text-gray-700">{{ selectedTask.idAuditTrail }}</p>
         </div>
 
-        <div class="mb-4">
+        <div>
           <label class="block text-sm font-semibold mb-2">Action</label>
           <p class="text-gray-700">{{ selectedTask.action || selectedTask.name || "-" }}</p>
         </div>
 
-        <div class="mb-4">
-          <label class="block text-sm font-semibold mb-2">Alasan Approve</label>
-          <textarea
-            v-model="approvalReason"
-            placeholder="Masukkan alasan approve..."
-            class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            rows="4"
-          ></textarea>
-        </div>
-
-        <div class="flex gap-2 justify-end">
-          <UiButton @click="closeApprovalModal" :disabled="isSubmitting" variant="secondary">
-            Cancel
-          </UiButton>
-          <UiButton
-            @click="handleApprove"
-            :disabled="isSubmitting"
-            variant="success"
-            :loading="isSubmitting"
-          >
-            {{ isSubmitting ? "Submitting..." : "Approve" }}
-          </UiButton>
-        </div>
+        <UiTextarea
+          v-model="approvalReason"
+          label="Alasan Approve"
+          placeholder="Masukkan alasan approve..."
+          :rows="4"
+        />
       </div>
-    </div>
+
+      <template #footer>
+        <UiButton @click="closeApprovalModal" :disabled="isSubmitting" variant="secondary">
+          Cancel
+        </UiButton>
+        <UiButton
+          @click="handleApprove"
+          :disabled="isSubmitting"
+          variant="success"
+          :loading="isSubmitting"
+        >
+          {{ isSubmitting ? "Submitting..." : "Approve" }}
+        </UiButton>
+      </template>
+    </UiModal>
   </div>
 </template>

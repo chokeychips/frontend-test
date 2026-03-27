@@ -62,7 +62,7 @@ const handleAction = (action, item, index) => {
             <th
               v-for="column in columns"
               :key="column.key"
-              class="p-3 text-left font-semibold text-gray-700 border-b"
+              class="p-3 text-center font-semibold text-gray-700 border-b"
             >
               {{ column.label }}
             </th>
